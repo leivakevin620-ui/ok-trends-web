@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>O&K Trends | Relojes de Lujo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Raleway:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root{
+            --emerald-900: #0d2e2a;
+            --emerald-800: #1a3a35;
+            --emerald-700: #1b6e4f;
+            --gold: #d4af37;
+            --gold-2: #f4d03f;
+            --cream: #f8f2dd;
+            --text-muted: #e8dcc8;
+        }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: linear-gradient(135deg, var(--emerald-900) 0%, var(--emerald-800) 100%);
+            color: var(--cream);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            position: fixed;
+            bottom: 40px;
+            left: 40px;
+            display: flex;
+            gap: 15px;
+            z-index: 999;
+        }
+        .nav-btn {
+            background: var(--gold);
+            color: var(--emerald-700);
+            border: 2px solid var(--gold);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.3em;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
+            font-family: 'Raleway', sans-serif;
+        }
+        .nav-btn:hover {
+            background: var(--emerald-700);
+            color: var(--gold);
+            transform: scale(1.1);
+            box-shadow: 0 6px 18px rgba(27, 110, 79, 0.4);
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, rgba(13,46,42,0.98), rgba(26,58,53,0.98));
+            backdrop-filter: blur(10px);
+            padding: 16px 40px;
+            z-index: 1000;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            border-bottom: 2px solid var(--gold);
+        }
+        header.scrolled { padding: 12px 40px; }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo { display: flex; align-items: center; gap: 15px; }
+        .logo img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--gold); object-fit: cover; }
+        .logo-text {
+            color: var(--gold);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+        .tagline { color: #a68f5f; font-size: 0.75rem; letter-spacing: 1px; }
+
+        .nav-menu { position: relative; }
+        .catalog-btn {
+            background: transparent;
+            color: var(--gold);
+            padding: 10px 22px;
+            border: 2px solid var(--gold);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 25px;
+        }
+        .catalog-btn:hover { background: var(--gold); color: var(--emerald-900); }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: linear-gradient(135deg, rgba(13,46,42,0.98), rgba(26,58,53,0.98));
+            border: 2px solid var(--gold);
+            border-top: none;
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 8px 25px rgba(212,175,55,0.3);
+        }
+        .dropdown-menu.active { opacity: 1; visibility: visible; transform: translateY(0); }
+        .dropdown-item {
+            display: block;
+            padding: 12px 20px;
+            color: var(--gold);
+            text-decoration: none;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(212,175,55,0.2);
+            cursor: pointer;
+        }
+        .dropdown-item:hover { background: var(--gold); color: var(--emerald-900); font-weight: 600; }
+        .dropdown-item:last-child { border-bottom: none; }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(135deg, var(--emerald-900) 0%, var(--emerald-800) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--cream);
+            position: relative;
+            overflow: hidden;
+            border-bottom: 3px solid var(--gold);
+            padding-top: 95px;
+        }
+        .hero::before{
+            content:'';
+            position:absolute;
+            inset:0;
+            background: url('img/logo.png') center/420px no-repeat;
+            opacity: 0.06;
+            z-index:0;
+        }
+
+        .site-header {
+            position: relative;
+            z-index: 5;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .brand { display:flex; align-items:center; gap:15px; }
+        .brand-logo { width:58px; height:58px; border-radius:50%; border:2px solid var(--gold); object-fit: cover; }
+        .brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            letter-spacing: 3px;
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        .site-nav { display:flex; gap:24px; font-weight:500; color: var(--text-muted); font-size: 0.95rem; }
+        .site-nav a { text-decoration:none; color:inherit; opacity:0.9; border-bottom:2px solid transparent; transition: all .3s ease; }
+        .site-nav a:hover { color: var(--gold); opacity: 1; }
+
+        .hero-inner {
+            position: relative;
+            z-index: 4;
+            margin: auto;
+            text-align: center;
+            width: min(95%, 1100px);
+            padding: 60px 24px 40px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero-logo-section { display:flex; flex-direction:column; align-items:center; gap:20px; margin-bottom: 50px; }
+        .hero-logo-large {
+            width: clamp(120px, 25vw, 200px);
+            height: clamp(120px, 25vw, 200px);
+            border-radius: 50%;
+            border: 5px solid var(--gold);
+            object-fit: cover;
+            box-shadow: 0 0 40px rgba(212,175,55,0.6), 0 0 80px rgba(212,175,55,0.3);
+            animation: glowPulse 3s ease-in-out infinite;
+        }
+        @keyframes glowPulse {
+            0%,100% { box-shadow: 0 0 40px rgba(212,175,55,0.6), 0 0 80px rgba(212,175,55,0.3); }
+            50%     { box-shadow: 0 0 50px rgba(212,175,55,0.8), 0 0 100px rgba(212,175,55,0.5); }
+        }
+
+        .hero-brand-name {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.2rem, 8vw, 4.5rem);
+            letter-spacing: 4px;
+            margin: 0;
+            background: linear-gradient(135deg, var(--gold), var(--gold-2), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            filter: drop-shadow(0 2px 4px rgba(212,175,55,0.3));
+        }
+
+        .hero-subtitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: clamp(0.95rem, 2.2vw, 1.3rem);
+            margin: 0 0 35px 0;
+            color: var(--gold);
+            opacity: 0.95;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .hero-btn {
+            display: inline-block;
+            background: transparent;
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            border-radius: 50px;
+            padding: 14px 32px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            letter-spacing: 1.5px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .hero-btn:hover { background: var(--gold); color: var(--emerald-900); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(212,175,55,0.4); }
+
+        .hero-tagline { font-family:'Montserrat',sans-serif; color: var(--gold); font-size: clamp(1rem, 2vw, 1.3rem); margin-top: 25px; letter-spacing: 2.5px; font-weight: 600; }
+
+        /* Weekly promo */
+        .weekly-promo-section {
+            position: relative;
+            z-index: 3;
+            padding: 50px 30px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .promo-header { text-align:center; margin-bottom: 40px; }
+        .promo-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 5vw, 2.6rem);
+            color: #f8e5b8;
+            letter-spacing: 2px;
+            margin: 0;
+        }
+        .promo-display {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--gold);
+            border-radius: 15px;
+            padding: 30px;
+            align-items: center;
+        }
+        .promo-card { display:grid; grid-template-columns: 1fr 1fr; gap:30px; align-items:center; }
+        .promo-card-image {
+            width: 100%;
+            max-width: 280px;
+            height: auto;
+            margin: 0 auto;
+            border: 3px solid var(--gold);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .promo-card-info { color: #f8e5b8; }
+        .promo-card-title {
+            font-family:'Playfair Display',serif;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 12px;
+        }
+        .promo-card-price { font-size: clamp(1.2rem, 3vw, 1.8rem); margin: 15px 0; }
+        .promo-original-price { text-decoration: line-through; color: #a68f5f; margin-right: 15px; }
+        .promo-final-price { color: #00ff8a; font-weight: 700; }
+        .promo-badge { display:inline-block; background:#ff6b6b; color:#fff; padding:8px 16px; border-radius:25px; font-weight:700; margin-bottom:15px; font-size: 0.9rem; }
+        .promo-description { font-size: 0.95rem; line-height:1.6; margin: 15px 0; opacity: 0.9; }
+        .promo-btn-buy {
+            display:inline-block;
+            background: var(--gold);
+            color: var(--emerald-900);
+            padding: 12px 28px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-top: 15px;
+        }
+        .promo-btn-buy:hover { background: var(--gold-2); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(212,175,55,0.4); }
+
+        /* Container / cards */
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 50px;
+            padding: 100px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .card {
+            background: #ffffff;
+            border: 2px solid #e8e8e8;
+            overflow: hidden;
+            transition: all 0.5s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+        .card:hover {
+            border-color: var(--gold);
+            box-shadow: 0 20px 50px rgba(212,175,55,0.15);
+            transform: translateY(-8px);
+        }
+        .card img { width: 100%; height: 320px; object-fit: cover; background: #f5f5f5; }
+        .card-content { padding: 45px 30px; flex-grow: 1; display:flex; flex-direction:column; }
+        .card h3 { font-family:'Lora',serif; font-size: 1.35em; color: var(--emerald-700); margin-bottom: 15px; letter-spacing: 0.8px; font-weight:700;}
+        .card p { font-size: 0.9em; color:#888; margin-bottom:12px; line-height:1.7; font-weight:300; }
+        .new-badge { display:inline-block; background: var(--emerald-700); color:#fdf6e3; font-size:0.75em; font-weight:700; padding:5px 8px; border-radius:3px; margin-bottom: 10px; letter-spacing: .5px; text-transform: uppercase;}
+        .price { color: var(--emerald-700); font-size: 1.25em; font-weight:700; margin: 25px 0; font-family:'Raleway',sans-serif; }
+        .btn-buy {
+            display:inline-block;
+            background: var(--gold);
+            color: var(--emerald-700);
+            padding: 15px 35px;
+            font-weight: 600;
+            border-radius: 0;
+            margin-top: auto;
+            font-size: 0.85em;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            border: 2px solid var(--gold);
+            cursor: pointer;
+            font-family: 'Raleway', sans-serif;
+            box-shadow: 0 4px 12px rgba(212,175,55,0.2);
+        }
+        .btn-buy:hover { background: var(--emerald-700); color: var(--gold); }
+
+        /* Contact section (form) */
+        .contact-section{
+            padding: 90px 20px;
+            background: linear-gradient(135deg, var(--emerald-900), var(--emerald-800));
+            border-top: 3px solid var(--gold);
+        }
+        .contact-inner{
+            max-width: 1100px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+        .contact-card{
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(212,175,55,0.35);
+            border-radius: 16px;
+            padding: 26px;
+            backdrop-filter: blur(10px);
+        }
+        .contact-card h2{
+            font-family: 'Playfair Display', serif;
+            color: #f8e5b8;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        .contact-card p{ color: var(--text-muted); margin-bottom: 14px; }
+        .contact-form label{
+            display:block;
+            margin: 10px 0 6px;
+            color: #f8e5b8;
+            font-weight: 600;
+            letter-spacing: .5px;
+        }
+        .contact-form input, .contact-form textarea{
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(212,175,55,0.35);
+            background: rgba(0,0,0,0.22);
+            color: var(--cream);
+            outline: none;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .contact-form textarea{ min-height: 120px; resize: vertical; }
+        .contact-actions{
+            display:flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        .btn-primary{
+            background: linear-gradient(135deg, var(--gold), var(--gold-2));
+            border: none;
+            color: var(--emerald-900);
+            padding: 12px 18px;
+            border-radius: 999px;
+            font-weight: 800;
+            cursor: pointer;
+            letter-spacing: .8px;
+            transition: transform .2s ease;
+        }
+        .btn-primary:hover{ transform: translateY(-2px); }
+        .btn-outline{
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .btn-outline:hover{ background: var(--gold); color: var(--emerald-900); }
+
+        footer {
+            text-align: center;
+            padding: 35px 30px;
+            background: linear-gradient(135deg, var(--emerald-900) 0%, var(--emerald-800) 100%);
+            border-top: 3px solid var(--gold);
+            color: var(--gold);
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 900px){
+            .site-header{ gap: 12px; padding: 16px 18px; flex-wrap: wrap; }
+            .site-nav{ font-size: .95rem; gap: 12px; }
+        }
+
+        @media (max-width: 768px){
+            header{ padding: 14px 16px; }
+            .nav-buttons{ left: 14px; bottom: 14px; }
+            .promo-card{ grid-template-columns: 1fr; text-align:center; }
+            .contact-inner{ grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="nav-buttons">
+    <button class="nav-btn" onclick="scrollToPrevious()" title="Ir Atrás">←</button>
+    <button class="nav-btn" onclick="scrollToNext()" title="Ir Adelante">→</button>
+</div>
+
+<header>
+    <div class="header-content">
+        <div class="logo">
+            <img src="img/logo.png" alt="Logo O&K Trends" onerror="this.style.display='none'">
+            <div>
+                <div class="logo-text">O&K TRENDS</div>
+                <div class="tagline">Est. 2026</div>
+            </div>
+        </div>
+        <nav class="nav-menu">
+            <button class="catalog-btn" onclick="toggleDropdown()">Catálogo ▼</button>
+            <div class="dropdown-menu" id="dropdownMenu">
+                <a class="dropdown-item" onclick="showCollection('Casio')">Colección Casio</a>
+                <a class="dropdown-item" onclick="showCollection('Rolex')">Colección Rolex</a>
+                <a class="dropdown-item" onclick="showCollection('T5')">Colección T5</a>
+                <a class="dropdown-item" onclick="showCollection('Invicta')">Colección Invicta</a>
+                <a class="dropdown-item" onclick="showCollection('Dama')">Colección Dama</a>
+                <a class="dropdown-item" onclick="showCollection('Hublot')">Colección Hublot</a>
+                <a class="dropdown-item" onclick="showCollection('Edifice')">Colección Edifice</a>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<div class="hero" id="hero">
+    <div class="site-header">
+        <div class="brand">
+            <img class="brand-logo" src="img/logo.png" alt="Logo O&K Trends" onerror="this.style.display='none'">
+            <div class="brand-name">O&K TRENDS</div>
+        </div>
+        <nav class="site-nav">
+            <a href="#hero">Inicio</a>
+            <a href="#all-collection">Colecciones</a>
+            <a href="#contacto">Contacto</a>
+        </nav>
+    </div>
+
+    <div class="hero-inner">
+        <div class="hero-logo-section">
+            <img src="img/logo.png" alt="O&K TRENDS Logo" class="hero-logo-large" onerror="this.style.display='none'">
+            <h1 class="hero-brand-name">O&K TRENDS</h1>
+        </div>
+        <h2 class="hero-subtitle">El tiempo a tu estilo | Catálogo de relojes</h2>
+        <a href="#contacto" class="hero-btn">CONTACTAR POR WHATSAPP</a>
+        <p class="hero-tagline">VERDE ESMERALDA · DORADO</p>
+    </div>
+
+    <div class="weekly-promo-section">
+        <div class="promo-header">
+            <h2>RELOJ DESTACADO DE LA SEMANA</h2>
+        </div>
+        <div class="promo-display" id="weeklyPromoDisplay"></div>
+    </div>
+</div>
+
+<!-- Contacto -->
+<section id="contacto" class="contact-section">
+    <div class="contact-inner">
+        <div class="contact-card">
+            <h2>Contacto</h2>
+            <p>Escríbenos y te respondemos por WhatsApp lo más rápido posible.</p>
+            <p><strong>WhatsApp:</strong> +57 320 658 0665</p>
+            <div class="contact-actions">
+                <button class="btn-outline" onclick="openWhatsApp('Hola O%26K Trends, quiero información por favor.')">Abrir WhatsApp</button>
+            </div>
+        </div>
+
+        <div class="contact-card">
+            <h2>Formulario</h2>
+            <form class="contact-form" onsubmit="sendContactForm(event)">
+                <label for="contactName">Nombre</label>
+                <input id="contactName" name="name" type="text" placeholder="Tu nombre" required>
+
+                <label for="contactPhone">Teléfono</label>
+                <input id="contactPhone" name="phone" type="tel" placeholder="Ej: 3200000000" required>
+
+                <label for="contactMsg">Mensaje</label>
+                <textarea id="contactMsg" name="message" placeholder="¿Qué reloj te interesa?" required></textarea>
+
+                <div class="contact-actions">
+                    <button class="btn-primary" type="submit">Enviar por WhatsApp</button>
+                    <button class="btn-outline" type="button" onclick="clearContactForm()">Limpiar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<footer id="footer">
+    <p style="font-size: 0.95em; margin-bottom: 10px;">© 2026 O&K Trends · Todos los derechos reservados</p>
+</footer>
+
+<script>
+    const WHATSAPP_NUMBER = '573206580665';
+
+    function openWhatsApp(text){
+        const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
+        window.open(url, '_blank');
+    }
+
+    function sendContactForm(e){
+        e.preventDefault();
+        const name = document.getElementById('contactName').value.trim();
+        const phone = document.getElementById('contactPhone').value.trim();
+        const msg = document.getElementById('contactMsg').value.trim();
+
+        const text =
+            `Hola O%26K Trends,%0A` +
+            `Soy: *${encodeURIComponent(name)}*%0A` +
+            `Mi teléfono es: *${encodeURIComponent(phone)}*%0A%0A` +
+            `Mensaje:%0A${encodeURIComponent(msg)}`;
+
+        openWhatsApp(text);
+    }
+
+    function clearContactForm(){
+        document.getElementById('contactName').value = '';
+        document.getElementById('contactPhone').value = '';
+        document.getElementById('contactMsg').value = '';
+    }
+
+    // Dropdown
+    function toggleDropdown() {
+        document.getElementById('dropdownMenu').classList.toggle('active');
+    }
+
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('dropdownMenu');
+        const catalogBtn = document.querySelector('.catalog-btn');
+        if (catalogBtn && dropdown && !catalogBtn.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.classList.remove('active');
+        }
+    });
+
+    window.addEventListener('scroll', function() {
+        const header = document.querySelector('header');
+        if (window.scrollY > 50) header.classList.add('scrolled');
+        else header.classList.remove('scrolled');
+    });
+
+    // Simple promo
+    function loadWeeklyPromo(){
+        const weeklyPromoDisplay = document.getElementById('weeklyPromoDisplay');
+        if (!weeklyPromoDisplay) return;
+        weeklyPromoDisplay.innerHTML = `<div style="text-align:center; padding: 18px;">Próximamente: promociones semanales.</div>`;
+    }
+
+    // Placeholder: tus funciones de colecciones no estaban en el snippet; se dejan como stubs para evitar errores.
+    function showCollection(){ alert('Catálogo: esta función se conectará a tu listado de productos.'); }
+
+    function scrollToPrevious(){ window.scrollBy({ top: -window.innerHeight, left: 0, behavior: 'smooth' }); }
+    function scrollToNext(){ window.scrollBy({ top: window.innerHeight, left: 0, behavior: 'smooth' }); }
+
+    document.addEventListener('DOMContentLoaded', loadWeeklyPromo);
+</script>
+</body>
+</html>
