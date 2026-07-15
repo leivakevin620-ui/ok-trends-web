@@ -1,11 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
-import { products, type CategoryId, type StoreProduct } from "@/data/catalog";
+import { products, type CategoryId, type StoreProduct } from "../../data/catalog";
 import {
   getServerConfiguration,
   isSupabaseConfigured,
   type ServerConfiguration,
-} from "@/lib/server-env";
+} from "../server-env";
 
 export type CatalogSource = "seed" | "supabase";
 
