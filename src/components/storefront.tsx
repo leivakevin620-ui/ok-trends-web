@@ -1,48 +1,81 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { categories, products, type CategoryId, type StoreProduct } from "@/data/catalog";
 import { formatCop } from "@/lib/currency";
 
 const CART_STORAGE_KEY = "ok-trends-cart-v1";
+const CART_CHANGE_EVENT = "ok-trends-cart-change";
+const EMPTY_CART_SNAPSHOT = "{}";
 
 type CartState = Readonly<Record<string, number>>;
+type CartUpdater = (current: CartState) => CartState;
 
-function readStoredCart(): CartState {
+function parseStoredCart(raw: string): CartState {
   try {
-    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
-    if (!raw) return {};
-
     const parsed: unknown = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
 
-    return Object.fromEntries(
-      Object.entries(parsed).filter(
-        ([productId, quantity]) =>
-          products.some((product) => product.id === productId) &&
-          Number.isInteger(quantity) &&
-          Number(quantity) > 0 &&
-          Number(quantity) <= 20,
-      ),
-    );
+    const safeCart: Record<string, number> = {};
+
+    for (const [productId, quantity] of Object.entries(parsed)) {
+      const numericQuantity = Number(quantity);
+      const productExists = products.some((product) => product.id === productId);
+
+      if (
+        productExists &&
+        Number.isInteger(numericQuantity) &&
+        numericQuantity > 0 &&
+        numericQuantity <= 20
+      ) {
+        safeCart[productId] = numericQuantity;
+      }
+    }
+
+    return safeCart;
   } catch {
     return {};
   }
 }
 
+function subscribeToCart(onStoreChange: () => void): () => void {
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === CART_STORAGE_KEY) onStoreChange();
+  };
+
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener(CART_CHANGE_EVENT, onStoreChange);
+
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener(CART_CHANGE_EVENT, onStoreChange);
+  };
+}
+
+function getCartSnapshot(): string {
+  return window.localStorage.getItem(CART_STORAGE_KEY) ?? EMPTY_CART_SNAPSHOT;
+}
+
+function getServerCartSnapshot(): string {
+  return EMPTY_CART_SNAPSHOT;
+}
+
+function persistCart(cart: CartState): void {
+  window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+  window.dispatchEvent(new Event(CART_CHANGE_EVENT));
+}
+
 export function Storefront() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryId | "all">("all");
-  const [cart, setCart] = useState<CartState>({});
   const [cartOpen, setCartOpen] = useState(false);
 
-  useEffect(() => {
-    setCart(readStoredCart());
-  }, []);
-
-  useEffect(() => {
-    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
-  }, [cart]);
+  const cartSnapshot = useSyncExternalStore(
+    subscribeToCart,
+    getCartSnapshot,
+    getServerCartSnapshot,
+  );
+  const cart = useMemo(() => parseStoredCart(cartSnapshot), [cartSnapshot]);
 
   const visibleProducts = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("es");
@@ -78,10 +111,14 @@ export function Storefront() {
     0,
   );
 
+  function updateCart(updater: CartUpdater): void {
+    persistCart(updater(cart));
+  }
+
   function addToCart(product: StoreProduct) {
     if (product.priceCop === null || product.source !== "verified") return;
 
-    setCart((current) => ({
+    updateCart((current) => ({
       ...current,
       [product.id]: Math.min((current[product.id] ?? 0) + 1, 20),
     }));
@@ -89,9 +126,9 @@ export function Storefront() {
   }
 
   function updateQuantity(productId: string, nextQuantity: number) {
-    setCart((current) => {
+    updateCart((current) => {
       if (nextQuantity <= 0) {
-        const next = { ...current };
+        const next: Record<string, number> = { ...current };
         delete next[productId];
         return next;
       }
