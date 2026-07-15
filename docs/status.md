@@ -1,25 +1,30 @@
 # Estado funcional
 
-## Implementada y pendiente de validación CI
+## Implementada y en validación CI
 
-- Aplicación Next.js.
-- TypeScript estricto.
-- Página pública responsive.
-- Identidad visual de O&K Trends.
-- Categorías.
-- Catálogo local tipado.
-- Búsqueda.
-- Filtros.
-- Carrito persistente en `localStorage`.
-- Cálculo de subtotal.
+- Aplicación Next.js con TypeScript estricto.
+- Página pública responsive e identidad visual de O&K Trends.
+- Catálogo local tipado, búsqueda y filtros.
+- Carrito persistente en `localStorage` y cálculo de subtotal.
 - Bloqueo de productos sin precio verificado.
 - Cabeceras HTTP básicas de seguridad.
-- Endpoint `/api/health`.
-- Pruebas unitarias iniciales.
+- Endpoint público `/api/health`.
+- Adaptador de catálogo con seed seguro y Supabase.
+- Fallback automático cuando Supabase está ausente o falla.
+- Sesión administrativa firmada, HttpOnly y con vencimiento.
+- Límite de intentos en el acceso administrativo.
+- Panel protegido `/admin`.
+- Vista protegida de productos.
+- Vista protegida de inventario.
+- Endpoint autenticado `/api/admin/status`.
+- Pruebas de seguridad de sesión, entorno y repositorio.
 
 ## Preparada, no aplicada
 
 - Migración inicial de PostgreSQL para Supabase.
+- Función pública restringida `get_public_catalog`.
+- Función administrativa `get_admin_inventory_snapshot`.
+- Trigger de creación automática de perfiles con Supabase Auth.
 - RLS base.
 - Roles y permisos.
 - Inventario y movimientos.
@@ -31,15 +36,17 @@
 - Auditoría.
 - Seed de desarrollo.
 
-## Simulada
+## Simulada o temporal
 
-- Productos iniciales almacenados localmente en TypeScript.
-- Estado de base de datos mostrado como `pending` hasta configurar Supabase.
+- Catálogo local usado cuando Supabase no está configurado.
+- Acceso administrativo bootstrap mediante variables privadas del servidor.
+- Panel de productos e inventario en modo solo lectura.
 - Proveedor de inteligencia artificial en modo `simulation`.
 
 ## Pendiente de credenciales
 
-- Proyecto Supabase exclusivo.
+- Proyecto Supabase exclusivo para O&K Trends.
+- Usuario propietario creado en Supabase Auth.
 - Despliegue Vercel conectado a la rama.
 - WhatsApp Business oficial.
 - Pasarela de pago.
@@ -61,10 +68,11 @@
 
 ## Bloqueada intencionalmente
 
+- Escritura administrativa persistente.
 - Checkout final.
-- Cobros.
-- Confirmación automática de pagos.
+- Cobros y confirmación automática de pagos.
 - Reembolsos.
 - Publicaciones externas.
 - Mensajes masivos.
 - Descuentos extraordinarios.
+- Ajustes destructivos de inventario.
