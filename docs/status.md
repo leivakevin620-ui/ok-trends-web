@@ -10,6 +10,7 @@
 - Cabeceras HTTP básicas de seguridad.
 - Endpoint público `/api/health`.
 - Adaptador de catálogo con seed seguro y Supabase.
+- Tienda pública conectada al adaptador de datos.
 - Fallback automático cuando Supabase está ausente o falla.
 - Sesión administrativa firmada, HttpOnly y con vencimiento.
 - Límite de intentos en el acceso administrativo.
@@ -18,7 +19,7 @@
 - Vista protegida de inventario.
 - Endpoint autenticado `/api/admin/status`.
 - Pruebas de seguridad de sesión, entorno y repositorio.
-- GitHub Actions ejecuta TypeScript, ESLint, pruebas unitarias y build.
+- GitHub Actions aprobó TypeScript, ESLint, pruebas unitarias y build.
 
 ## Preparada, no aplicada
 
