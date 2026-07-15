@@ -19,13 +19,15 @@ export interface ServerConfiguration {
   readonly aiProvider: string;
 }
 
+export type EnvironmentSource = Readonly<Record<string, string | undefined>>;
+
 function clean(value: string | undefined): string | null {
   const normalized = value?.trim();
   return normalized ? normalized : null;
 }
 
 export function getServerConfiguration(
-  environment: NodeJS.ProcessEnv = process.env,
+  environment: EnvironmentSource = process.env,
 ): ServerConfiguration {
   const parsed = ServerEnvironmentSchema.parse(environment);
 
