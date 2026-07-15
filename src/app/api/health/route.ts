@@ -14,7 +14,7 @@ export function GET() {
     {
       status: "ok",
       service: "ok-trends-store",
-      version: "0.2.0",
+      version: "0.1.0",
       database: isSupabaseConfigured(configuration) ? "configured" : "pending",
       admin: isAdminBootstrapConfigured(configuration) ? "configured" : "pending",
       mode: configuration.aiProvider,
