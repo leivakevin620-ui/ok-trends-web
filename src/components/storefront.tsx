@@ -1,7 +1,12 @@
 "use client";
 
 import { useMemo, useState, useSyncExternalStore } from "react";
-import { categories, products, type CategoryId, type StoreProduct } from "@/data/catalog";
+import {
+  categories,
+  products as seedProducts,
+  type CategoryId,
+  type StoreProduct,
+} from "@/data/catalog";
 import { formatCop } from "@/lib/currency";
 
 const CART_STORAGE_KEY = "ok-trends-cart-v1";
@@ -11,7 +16,13 @@ const EMPTY_CART_SNAPSHOT = "{}";
 type CartState = Readonly<Record<string, number>>;
 type CartUpdater = (current: CartState) => CartState;
 
-function parseStoredCart(raw: string): CartState {
+interface StorefrontProps {
+  readonly initialProducts?: readonly StoreProduct[];
+  readonly catalogSource?: "seed" | "supabase";
+  readonly catalogWarning?: string | null;
+}
+
+function parseStoredCart(raw: string, productCatalog: readonly StoreProduct[]): CartState {
   try {
     const parsed: unknown = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
@@ -20,7 +31,7 @@ function parseStoredCart(raw: string): CartState {
 
     for (const [productId, quantity] of Object.entries(parsed)) {
       const numericQuantity = Number(quantity);
-      const productExists = products.some((product) => product.id === productId);
+      const productExists = productCatalog.some((product) => product.id === productId);
 
       if (
         productExists &&
@@ -65,7 +76,11 @@ function persistCart(cart: CartState): void {
   window.dispatchEvent(new Event(CART_CHANGE_EVENT));
 }
 
-export function Storefront() {
+export function Storefront({
+  initialProducts = seedProducts,
+  catalogSource = "seed",
+  catalogWarning = null,
+}: StorefrontProps) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<CategoryId | "all">("all");
   const [cartOpen, setCartOpen] = useState(false);
@@ -75,12 +90,15 @@ export function Storefront() {
     getCartSnapshot,
     getServerCartSnapshot,
   );
-  const cart = useMemo(() => parseStoredCart(cartSnapshot), [cartSnapshot]);
+  const cart = useMemo(
+    () => parseStoredCart(cartSnapshot, initialProducts),
+    [cartSnapshot, initialProducts],
+  );
 
   const visibleProducts = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("es");
 
-    return products.filter((product) => {
+    return initialProducts.filter((product) => {
       const matchesCategory = category === "all" || product.categoryId === category;
       const matchesQuery =
         !normalizedQuery ||
@@ -90,21 +108,30 @@ export function Storefront() {
 
       return product.published && matchesCategory && matchesQuery;
     });
-  }, [category, query]);
+  }, [category, initialProducts, query]);
 
   const cartLines = useMemo(
     () =>
       Object.entries(cart)
         .map(([productId, quantity]) => {
-          const product = products.find((item) => item.id === productId);
+          const product = initialProducts.find((item) => item.id === productId);
           return product ? { product, quantity } : null;
         })
         .filter(
           (line): line is { product: StoreProduct; quantity: number } => line !== null,
         ),
-    [cart],
+    [cart, initialProducts],
   );
 
+  const verifiedProducts = initialProducts.filter(
+    (product) => product.published && product.source === "verified",
+  );
+  const featuredProduct =
+    verifiedProducts.find((product) => product.priceCop !== null) ?? initialProducts[0] ?? null;
+  const knownUnits = verifiedProducts.reduce(
+    (total, product) => total + (product.stock ?? 0),
+    0,
+  );
   const cartQuantity = cartLines.reduce((total, line) => total + line.quantity, 0);
   const subtotal = cartLines.reduce(
     (total, line) => total + (line.product.priceCop ?? 0) * line.quantity,
@@ -185,18 +212,22 @@ export function Storefront() {
               <span className="watch-face">O&K</span>
             </div>
             <div>
-              <small>Reloj Richard Mille negro</small>
-              <strong>{formatCop(89_900)}</strong>
-              <p>Quedan 4 unidades en el catálogo verificado.</p>
+              <small>{featuredProduct?.name ?? "Catálogo O&K Trends"}</small>
+              <strong>{formatCop(featuredProduct?.priceCop ?? null)}</strong>
+              <p>
+                {featuredProduct?.stock === null || featuredProduct?.stock === undefined
+                  ? "Disponibilidad pendiente de confirmación."
+                  : `Quedan ${featuredProduct.stock} unidades registradas.`}
+              </p>
             </div>
           </div>
         </section>
 
         <section className="metrics" aria-label="Estado de la tienda">
-          <article><strong>6</strong><span>Categorías preparadas</span></article>
-          <article><strong>2</strong><span>Productos verificados</span></article>
-          <article><strong>3 meses</strong><span>Garantía en referencias indicadas</span></article>
-          <article><strong>100%</strong><span>Precios sin inventar</span></article>
+          <article><strong>{categories.length}</strong><span>Categorías preparadas</span></article>
+          <article><strong>{verifiedProducts.length}</strong><span>Productos verificados</span></article>
+          <article><strong>{knownUnits}</strong><span>Unidades conocidas</span></article>
+          <article><strong>{catalogSource === "supabase" ? "En línea" : "Seguro"}</strong><span>Fuente del catálogo</span></article>
         </section>
 
         <section className="catalog-section" id="catalogo">
@@ -214,6 +245,12 @@ export function Storefront() {
               />
             </label>
           </div>
+
+          {catalogWarning ? (
+            <p className="empty-state" role="status">
+              Catálogo protegido: se muestran datos locales verificados mientras se restablece la fuente principal.
+            </p>
+          ) : null}
 
           <div className="category-list" role="list" aria-label="Categorías">
             <button
