@@ -1,10 +1,10 @@
 # Estado funcional
 
-## Implementada y en validación CI
+## Implementada y probada
 
 - Aplicación Next.js con TypeScript estricto.
 - Página pública responsive e identidad visual de O&K Trends.
-- Catálogo local tipado, búsqueda y filtros.
+- Catálogo tipado, búsqueda y filtros.
 - Carrito persistente en `localStorage` y cálculo de subtotal.
 - Bloqueo de productos sin precio verificado.
 - Cabeceras HTTP básicas de seguridad.
@@ -18,6 +18,7 @@
 - Vista protegida de inventario.
 - Endpoint autenticado `/api/admin/status`.
 - Pruebas de seguridad de sesión, entorno y repositorio.
+- GitHub Actions ejecuta TypeScript, ESLint, pruebas unitarias y build.
 
 ## Preparada, no aplicada
 
