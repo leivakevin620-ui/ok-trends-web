@@ -8,7 +8,7 @@
 - Carrito persistente en `localStorage` y cálculo de subtotal.
 - Bloqueo de productos sin precio verificado.
 - Cabeceras HTTP básicas de seguridad.
-- Endpoint público `/api/health`.
+- Endpoint público `/api/health` con estados seguros de preparación.
 - Adaptador de catálogo con seed seguro y Supabase.
 - Tienda pública conectada al adaptador de datos.
 - Fallback automático cuando Supabase está ausente o falla.
@@ -18,8 +18,8 @@
 - Vista protegida de productos.
 - Vista protegida de inventario.
 - Endpoint autenticado `/api/admin/status`.
-- Pruebas de seguridad de sesión, entorno y repositorio.
-- GitHub Actions aprobó TypeScript, ESLint, pruebas unitarias y build.
+- Pruebas de seguridad de sesión, entorno, Supabase y repositorio.
+- GitHub Actions ejecuta TypeScript, ESLint, pruebas unitarias y build.
 
 ## Preparada, no aplicada
 
