@@ -34,6 +34,7 @@ La implementación HTML anterior se conserva como referencia mientras se complet
 - Panel protegido en `/admin`.
 - Vistas de productos e inventario en modo de solo lectura.
 - Endpoint autenticado `/api/admin/status`.
+- Endpoint público `/api/health` sin secretos y con estados de preparación.
 - Edición bloqueada hasta conectar Supabase Auth y aplicar RLS.
 
 ### Base de datos
