@@ -59,4 +59,19 @@ describe("server configuration", () => {
 
     expect(isAdminBootstrapConfigured(configuration)).toBe(true);
   });
+
+  it("requires both Supabase public values before enabling the adapter", () => {
+    const incomplete = getServerConfiguration({
+      NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "",
+    });
+
+    const complete = getServerConfiguration({
+      NEXT_PUBLIC_SUPABASE_URL: "https://example.supabase.co",
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "publishable-test-key",
+    });
+
+    expect(isSupabaseConfigured(incomplete)).toBe(false);
+    expect(isSupabaseConfigured(complete)).toBe(true);
+  });
 });
