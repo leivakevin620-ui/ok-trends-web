@@ -21,12 +21,14 @@ La implementación HTML anterior se conserva como referencia mientras se complet
 - Búsqueda y filtros.
 - Carrito persistente en el navegador.
 - Separación entre productos verificados y contenido de demostración.
+- Catálogo cargado mediante un repositorio intercambiable.
+- Uso automático de Supabase cuando está configurado.
+- Fallback seguro al catálogo local cuando la base no está disponible.
 - Checkout bloqueado hasta configurar pagos, contacto y entregas.
 
 ### Datos y administración
 
 - Adaptador de catálogo con dos fuentes: seed local seguro y Supabase.
-- Fallback automático sin inventar información cuando Supabase no responde.
 - Acceso del propietario mediante sesión firmada, HttpOnly y con vencimiento.
 - Límite de intentos de acceso.
 - Panel protegido en `/admin`.
@@ -77,6 +79,8 @@ Ejecuta:
 2. ESLint.
 3. Pruebas unitarias.
 4. Build de producción.
+
+GitHub Actions ejecuta la misma puerta de calidad en cada cambio de la rama.
 
 ## Variables de entorno
 
