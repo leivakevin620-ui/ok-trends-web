@@ -1,0 +1,313 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { categories, products, type CategoryId, type StoreProduct } from "@/data/catalog";
+import { formatCop } from "@/lib/currency";
+
+const CART_STORAGE_KEY = "ok-trends-cart-v1";
+
+type CartState = Readonly<Record<string, number>>;
+
+function readStoredCart(): CartState {
+  try {
+    const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+    if (!raw) return {};
+
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return {};
+
+    return Object.fromEntries(
+      Object.entries(parsed).filter(
+        ([productId, quantity]) =>
+          products.some((product) => product.id === productId) &&
+          Number.isInteger(quantity) &&
+          Number(quantity) > 0 &&
+          Number(quantity) <= 20,
+      ),
+    );
+  } catch {
+    return {};
+  }
+}
+
+export function Storefront() {
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState<CategoryId | "all">("all");
+  const [cart, setCart] = useState<CartState>({});
+  const [cartOpen, setCartOpen] = useState(false);
+
+  useEffect(() => {
+    setCart(readStoredCart());
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+  }, [cart]);
+
+  const visibleProducts = useMemo(() => {
+    const normalizedQuery = query.trim().toLocaleLowerCase("es");
+
+    return products.filter((product) => {
+      const matchesCategory = category === "all" || product.categoryId === category;
+      const matchesQuery =
+        !normalizedQuery ||
+        `${product.name} ${product.description}`
+          .toLocaleLowerCase("es")
+          .includes(normalizedQuery);
+
+      return product.published && matchesCategory && matchesQuery;
+    });
+  }, [category, query]);
+
+  const cartLines = useMemo(
+    () =>
+      Object.entries(cart)
+        .map(([productId, quantity]) => {
+          const product = products.find((item) => item.id === productId);
+          return product ? { product, quantity } : null;
+        })
+        .filter(
+          (line): line is { product: StoreProduct; quantity: number } => line !== null,
+        ),
+    [cart],
+  );
+
+  const cartQuantity = cartLines.reduce((total, line) => total + line.quantity, 0);
+  const subtotal = cartLines.reduce(
+    (total, line) => total + (line.product.priceCop ?? 0) * line.quantity,
+    0,
+  );
+
+  function addToCart(product: StoreProduct) {
+    if (product.priceCop === null || product.source !== "verified") return;
+
+    setCart((current) => ({
+      ...current,
+      [product.id]: Math.min((current[product.id] ?? 0) + 1, 20),
+    }));
+    setCartOpen(true);
+  }
+
+  function updateQuantity(productId: string, nextQuantity: number) {
+    setCart((current) => {
+      if (nextQuantity <= 0) {
+        const next = { ...current };
+        delete next[productId];
+        return next;
+      }
+
+      return { ...current, [productId]: Math.min(nextQuantity, 20) };
+    });
+  }
+
+  return (
+    <>
+      <header className="site-header">
+        <a className="brand" href="#inicio" aria-label="Ir al inicio de O&K Trends">
+          <span className="brand-mark">O&K</span>
+          <span>
+            <strong>O&K Trends</strong>
+            <small>Estilo que marca tu tiempo</small>
+          </span>
+        </a>
+
+        <nav aria-label="Navegación principal">
+          <a href="#catalogo">Catálogo</a>
+          <a href="#beneficios">Beneficios</a>
+          <a href="#preguntas">Preguntas</a>
+        </nav>
+
+        <button className="cart-button" type="button" onClick={() => setCartOpen(true)}>
+          Carrito <span>{cartQuantity}</span>
+        </button>
+      </header>
+
+      <main id="inicio">
+        <section className="hero-section">
+          <div className="hero-copy">
+            <span className="eyebrow">TIENDA MULTICATEGORÍA · SANTA MARTA</span>
+            <h1>Accesorios y estilo para destacar todos los días.</h1>
+            <p>
+              Compra relojes y descubre las próximas colecciones de perfumes, ropa,
+              gorras, zapatos y accesorios de O&K Trends.
+            </p>
+            <div className="hero-actions">
+              <a className="primary-button" href="#catalogo">Ver catálogo</a>
+              <a className="secondary-button" href="#beneficios">Cómo comprar</a>
+            </div>
+            <div className="trust-row" aria-label="Beneficios de compra">
+              <span>✓ Precios verificados</span>
+              <span>✓ Garantía informada</span>
+              <span>✓ Atención personalizada</span>
+            </div>
+          </div>
+
+          <div className="hero-card" aria-label="Producto destacado">
+            <span className="hero-card-badge">DESTACADO</span>
+            <div className="watch-visual" aria-hidden="true">
+              <span className="watch-face">O&K</span>
+            </div>
+            <div>
+              <small>Reloj Richard Mille negro</small>
+              <strong>{formatCop(89_900)}</strong>
+              <p>Quedan 4 unidades en el catálogo verificado.</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="metrics" aria-label="Estado de la tienda">
+          <article><strong>6</strong><span>Categorías preparadas</span></article>
+          <article><strong>2</strong><span>Productos verificados</span></article>
+          <article><strong>3 meses</strong><span>Garantía en referencias indicadas</span></article>
+          <article><strong>100%</strong><span>Precios sin inventar</span></article>
+        </section>
+
+        <section className="catalog-section" id="catalogo">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">CATÁLOGO</span>
+              <h2>Encuentra tu próximo favorito</h2>
+            </div>
+            <label className="search-box">
+              <span className="sr-only">Buscar productos</span>
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Buscar por nombre o característica"
+              />
+            </label>
+          </div>
+
+          <div className="category-list" role="list" aria-label="Categorías">
+            <button
+              className={category === "all" ? "active" : ""}
+              type="button"
+              onClick={() => setCategory("all")}
+            >
+              Todo
+            </button>
+            {categories.map((item) => (
+              <button
+                className={category === item.id ? "active" : ""}
+                key={item.id}
+                type="button"
+                onClick={() => setCategory(item.id)}
+              >
+                <span aria-hidden="true">{item.icon}</span> {item.name}
+              </button>
+            ))}
+          </div>
+
+          <div className="product-grid">
+            {visibleProducts.map((product) => (
+              <article className="product-card" key={product.id}>
+                <div className="product-art" style={{ background: product.accent }}>
+                  <span>{product.categoryId === "watches" ? "⌚" : "O&K"}</span>
+                  {product.badge ? <small>{product.badge}</small> : null}
+                </div>
+                <div className="product-content">
+                  <div>
+                    <span className="product-source">
+                      {product.source === "verified" ? "Datos verificados" : "Vista previa"}
+                    </span>
+                    <h3>{product.name}</h3>
+                    <p>{product.description}</p>
+                  </div>
+                  <div className="product-footer">
+                    <div>
+                      <strong>{formatCop(product.priceCop)}</strong>
+                      {product.warranty ? <small>{product.warranty}</small> : null}
+                    </div>
+                    <button
+                      type="button"
+                      disabled={product.priceCop === null || product.source !== "verified"}
+                      onClick={() => addToCart(product)}
+                    >
+                      {product.priceCop === null ? "Próximamente" : "Agregar"}
+                    </button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          {visibleProducts.length === 0 ? (
+            <p className="empty-state">No encontramos productos con esos filtros.</p>
+          ) : null}
+        </section>
+
+        <section className="benefit-section" id="beneficios">
+          <div className="section-heading compact">
+            <div>
+              <span className="eyebrow">COMPRA CON CONFIANZA</span>
+              <h2>Una experiencia clara, sin promesas inventadas</h2>
+            </div>
+          </div>
+          <div className="benefit-grid">
+            <article><span>01</span><h3>Explora</h3><p>Busca por categoría y revisa únicamente datos comerciales registrados.</p></article>
+            <article><span>02</span><h3>Agrega</h3><p>Guarda productos en un carrito persistente dentro de tu dispositivo.</p></article>
+            <article><span>03</span><h3>Confirma</h3><p>El checkout definitivo se habilitará cuando estén configurados contacto, entrega y pagos.</p></article>
+          </div>
+        </section>
+
+        <section className="faq-section" id="preguntas">
+          <span className="eyebrow">PREGUNTAS FRECUENTES</span>
+          <h2>Información comercial disponible</h2>
+          <details><summary>¿Dónde opera O&K Trends?</summary><p>La operación general está registrada en Santa Marta, Magdalena. La dirección exacta aún no está publicada.</p></details>
+          <details><summary>¿Qué garantía tienen los relojes?</summary><p>Las referencias indicadas incluyen 3 meses por maquinaria y batería.</p></details>
+          <details><summary>¿Cómo finalizo mi compra?</summary><p>El carrito ya funciona. La confirmación de pedidos se activará cuando el propietario configure los canales oficiales de contacto, entrega y pago.</p></details>
+        </section>
+      </main>
+
+      <footer>
+        <div className="brand footer-brand"><span className="brand-mark">O&K</span><span><strong>O&K Trends</strong><small>Santa Marta, Colombia</small></span></div>
+        <p>Plataforma en construcción controlada. No procesa pagos todavía.</p>
+      </footer>
+
+      {cartOpen ? (
+        <div className="cart-backdrop" role="presentation" onMouseDown={() => setCartOpen(false)}>
+          <aside
+            className="cart-drawer"
+            aria-label="Carrito de compras"
+            aria-modal="true"
+            role="dialog"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className="cart-header">
+              <div><span className="eyebrow">TU SELECCIÓN</span><h2>Carrito</h2></div>
+              <button type="button" onClick={() => setCartOpen(false)} aria-label="Cerrar carrito">×</button>
+            </div>
+
+            {cartLines.length === 0 ? (
+              <p className="empty-state">Tu carrito está vacío.</p>
+            ) : (
+              <div className="cart-lines">
+                {cartLines.map(({ product, quantity }) => (
+                  <article key={product.id}>
+                    <div><strong>{product.name}</strong><span>{formatCop(product.priceCop)}</span></div>
+                    <div className="quantity-control">
+                      <button type="button" onClick={() => updateQuantity(product.id, quantity - 1)}>−</button>
+                      <span>{quantity}</span>
+                      <button type="button" onClick={() => updateQuantity(product.id, quantity + 1)}>+</button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+
+            <div className="cart-summary">
+              <span>Subtotal</span>
+              <strong>{formatCop(subtotal)}</strong>
+            </div>
+            <button className="checkout-button" type="button" disabled>
+              Checkout pendiente de configuración
+            </button>
+            <small className="cart-note">
+              No solicitaremos pagos ni datos bancarios hasta configurar una pasarela oficial.
+            </small>
+          </aside>
+        </div>
+      ) : null}
+    </>
+  );
+}
